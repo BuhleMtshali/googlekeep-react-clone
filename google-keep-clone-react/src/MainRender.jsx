@@ -56,6 +56,10 @@ const autoGrow = (elem) => {
 };
 
 const MainRender = (props) => {
+  const handleDelete = (id) => {
+    props.onDelete(id);
+  };
+
   return (
     <main>
       <NoteInput>
@@ -95,8 +99,8 @@ const MainRender = (props) => {
       </NoteInput>
 
       <NoteCon>
-        {props.notes.map((note, index) => (
-          <Note note={note} key={index} />
+        {props.notes.map((note) => (
+          <Note note={note} id={note.id} key={note.id} onDelete={props.onDelete}/>
         ))}
       </NoteCon>
     </main>

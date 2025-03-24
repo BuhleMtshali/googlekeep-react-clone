@@ -1,37 +1,87 @@
-import { useState, useRef } from 'react';
-import Header from './Header';
-import MainRender from './MainRender';
-import './App.css';
+import { useState, useRef, useEffect } from "react"; // ✅ Import useEffect
+import Header from "./Header";
+import MainRender from "./MainRender";
+import { database } from "./Firebase"; // ✅ Correctly Import Firebase Database
+import { ref, push, set, get, remove} from "firebase/database";
+import "./App.css";
 
 function App() {
-  // State to toggle input visibility
+  // State for user input
   const [showInput, setShowInput] = useState(false);
-  
-  // States for text input values
   const [textValue, setTextValue] = useState('');
   const [titleValue, setTitleValue] = useState('');
-
-  // States to track input focus
+  
+  // State for tracking input focus
   const [textFocused, setTextFocused] = useState(false);
   const [titleFocused, setTitleFocused] = useState(false);
-
-  // Ref for textarea focus
-  const textAreaRef = useRef(null);
 
   // State for saved notes
   const [notes, setNotes] = useState([]);
 
-  // Handles when the user clicks away
+  // Ref for textarea focus
+  const textAreaRef = useRef(null);
+
+  // ✅ Function to save note
   const blurOut = () => {
     if (!textFocused && !titleFocused) {
       if (textValue.trim() !== '' || titleValue.trim() !== '') {
         setShowInput(false);
-        setNotes([...notes, { title: titleValue, text: textValue }]);
+  
+        let noteObj = {
+          title: titleValue,
+          text: textValue
+        };
+  
+        const dbRef = ref(database, "data"); // Reference to "data" node in Firebase
+        const newNoteRef = push(dbRef); // Generate a unique ID for the note
+        set(newNoteRef, noteObj) // Save note to Firebase
+          .then(() => {
+            setNotes([...notes, { ...noteObj, id: newNoteRef.key }]); // Add the note with the Firebase ID
+          })
+          .catch(error => console.error("Error adding note:", error));
+  
         setTextValue('');
         setTitleValue('');
       }
     }
   };
+
+  const handleDelete = (id) => {
+    // Remove from Firebase
+    const dbRef = ref(database, `data/${id}`);
+    remove(dbRef)
+      .then(() => {
+        // Remove from local state
+        setNotes(notes.filter(note => note.id !== id));
+      })
+      .catch(error => console.error("Error deleting note:", error));
+  };
+  
+
+  // ✅ Function to fetch notes
+  const getData = () => {
+    let notesArr = [];
+    try {  
+      const dbRef = ref(database, "data");
+      get(dbRef).then(snapshot => {
+        snapshot.forEach(note => {
+          notesArr.push({ id: note.key, ...note.val() }); // Ensure each note has an ID
+        });
+  
+        if (notesArr.length !== 0) {
+          setNotes(notesArr);
+        }
+      });
+    } catch (error) {
+      console.error("Error fetching notes:", error);
+    }
+  };
+  
+
+  // ✅ Fetch data when component mounts
+  useEffect(() => {
+    getData();
+  }, []);
 
   return (
     <>
@@ -42,12 +92,13 @@ function App() {
         showInput={showInput}
         textAreaRef={textAreaRef}
         notes={notes}
+        onDelete={handleDelete}
         onShowInput={setShowInput}
         onTextChange={setTextValue}
         onTitleChange={setTitleValue}
         onTextFocus={setTextFocused}
         onTitleFocus={setTitleFocused}
-        onBlurOut={blurOut} // Pass blurOut function
+        onBlurOut={blurOut}
       />
     </>
   );
