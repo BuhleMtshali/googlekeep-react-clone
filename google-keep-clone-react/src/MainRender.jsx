@@ -1,7 +1,6 @@
 import React from "react";
-
-const MainRender = () => {
-    const NoteInput = styled.form`
+import styled from "styled-components";
+const NoteInput = styled.form`
     box-shadow: 0 1px 2px 0 rgba(60,64,67,.3),
     0 2px 6px 2px rgba(60,64,67,.15);
     width:600px;
@@ -39,6 +38,9 @@ const MainRender = () => {
         opacity:1;
       }
   `
+
+const MainRender = () => {
+    
     return (
         <main>
             <NoteInput>

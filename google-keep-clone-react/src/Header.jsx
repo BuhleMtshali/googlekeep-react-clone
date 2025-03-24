@@ -1,11 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import keepLogo from '/favicon-1.png';
-import reactLogo from '/react-logo.png';
-import fireBaseLogo from '/firebase-logo.png';
-
-const Header = () => {
-    const Nav = styled.nav`
+import keepLogo from '/imgs/favicon-1.png';
+import reactLogo from '/imgs/react-logo.png';
+import fireBaseLogo from '/imgs/firebase-logo.png';
+const Nav = styled.nav`
                             display: flex;
                             justify-content: space-between;
                             align-items:center;
@@ -20,6 +18,8 @@ const Header = () => {
                             width:40px;
                             height:40px;
                             `;
+const Header = () => {
+    
     return(
         <>
         <Nav>
